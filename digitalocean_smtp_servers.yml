@@ -1,30 +1,34 @@
-- hosts: web_servers
+- hosts: smtp
 
   roles:
     - { role: digitalocean_firewall,
         vars: {
-            digitalocean_firewall_name: fw-web-servers,
+            digitalocean_firewall_name: fw-smtp-servers,
             digitalocean_firewall_rule: ssh-inbound,
             digitalocean_firewall_rule_status: enable
         },
         tags: [ ssh_on ]
       }
 
+    - { role: centos_selinux,
+        vars: {
+            centos_selinux_state: disabled  # for demo only
+        },
+        tags: selinux }
+
     - { role: centos_certbot_easydns,
         vars: {
             centos_certbot_easydns_api: "{{ easydns_api }}",
             centos_certbot_easydns_token: "{{ easydns_token }}",
             centos_certbot_easydns_key: "{{ easydns_key }}",
-            centos_certbot_easydns_domain: "{{ website_domain }}",
-            centos_certbot_easydns_email: "{{ website_domain_email }}"
+            centos_certbot_easydns_domain: "{{ smtp_domain }}",
+            centos_certbot_easydns_email: "{{ smtp_domain_email }}"
         },
         tags: certbot }
 
-    - { role: centos_nginx_webserver, tags: nginx }
-
     - { role: digitalocean_firewall,
         vars: {
-            digitalocean_firewall_name: fw-web-servers,
+            digitalocean_firewall_name: fw-smtp-servers,
             digitalocean_firewall_rule: ssh-inbound,
             digitalocean_firewall_rule_status: disable
         },
